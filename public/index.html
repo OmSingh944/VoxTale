@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+
+<div class="topbar">
+  <button class="iconbtn" id="backBtn" aria-label="Back to text" hidden>
+    <svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+  </button>
+  <span id="topSpacer"></span>
+  <div class="right">
+    <button class="iconbtn" id="settingsBtn" aria-label="Audio settings">
+      <svg class="i" viewBox="0 0 24 24"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ============ INPUT VIEW ============ -->
+<main class="intro" id="inputView">
+  <h1>VoxTale</h1>
+  <p class="tag">Every character gets a voice.</p>
+
+  <label class="field"><span>Title</span>
+    <input type="text" id="titleIn" placeholder="e.g. Alice in Wonderland" maxlength="80" />
+  </label>
+  <label class="field"><span>Known book? (optional)</span>
+    <input type="text" id="bookIn" placeholder="e.g. Alice's Adventures in Wonderland, Lewis Carroll" maxlength="120" />
+    <small class="hint">If this is a published book, the app looks it up online to confirm character ages and genders.</small>
+  </label>
+  <label class="field"><span>Story text</span>
+    <textarea id="text" placeholder="Paste a chapter or excerpt (use a public-domain book)..."></textarea>
+  </label>
+  <div class="row">
+    <button class="btn primary" id="gen">Create audiobook</button>
+    <button class="btn" id="sample" type="button">Use sample</button>
+    <label class="btn" style="cursor:pointer">Upload .txt<input type="file" id="file" accept=".txt,text/plain" hidden /></label>
+    <span class="count" id="count">0 / 4000</span>
+  </div>
+  <div class="err" id="genErr" role="alert"></div>
+</main>
+
+<!-- ============ PLAYER VIEW ============ -->
+<main class="player" id="playerView" hidden>
+  <div class="cover" id="cover"></div>
+  <h2 class="p-title" id="pTitle"></h2>
+  <p class="p-sub" id="pSub"></p>
+
+  <div class="controls">
+    <button class="iconbtn" id="prevBtn" aria-label="Previous line">
+      <svg class="i" viewBox="0 0 24 24"><path d="M6 5v14"/><path d="M19 5l-9 7 9 7z" fill="currentColor"/></svg>
+    </button>
+    <button class="iconbtn skip" id="backSkip" aria-label="Skip back">
+      <svg class="i" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.4-5.5"/><path d="M4 3.8v4.4h4.4"/></svg>
+      <span class="n" id="backN">10</span>
+    </button>
+    <button class="iconbtn play" id="playBtn" aria-label="Play">
+      <svg class="i" id="icoPlay" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z" fill="currentColor"/></svg>
+      <svg class="i" id="icoPause" viewBox="0 0 24 24" hidden><rect x="6.5" y="5" width="4" height="14" rx="1" fill="currentColor"/><rect x="13.5" y="5" width="4" height="14" rx="1" fill="currentColor"/></svg>
+      <span class="spinner" id="icoSpin" hidden></span>
+    </button>
+    <button class="iconbtn skip fwd" id="fwdSkip" aria-label="Skip forward">
+      <svg class="i" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.4-5.5"/><path d="M4 3.8v4.4h4.4"/></svg>
+      <span class="n" id="fwdN">10</span>
+    </button>
+    <button class="iconbtn" id="nextBtn" aria-label="Next line">
+      <svg class="i" viewBox="0 0 24 24"><path d="M18 5v14"/><path d="M5 5l9 7-9 7z" fill="currentColor"/></svg>
+    </button>
+  </div>
+
+  <div class="chapter" id="chapter"></div>
+  <div class="seekwrap">
+    <div class="ticks" id="ticks"></div>
+    <input class="seek" id="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Progress" />
+  </div>
+  <div class="times"><span id="tCur">0:00</span><span id="tTot">0:00</span></div>
+
+  <div class="tools">
+    <div class="tool">
+      <button class="iconbtn" id="volBtn" aria-label="Volume"><svg class="i" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5l4.5 4v-13l-4.5 4z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18 6.5a8 8 0 0 1 0 11"/></svg></button>
+      <small>&nbsp;</small>
+      <div class="pop" id="volPop" hidden><input type="range" id="vol" min="0" max="100" value="100" aria-label="Volume" /></div>
+    </div>
+    <div class="tool">
+      <button class="iconbtn" id="speedBtn" aria-label="Playback speed"><svg class="i" viewBox="0 0 24 24"><path d="M4.5 17a8.5 8.5 0 1 1 15 0"/><path d="M12 14l4-5"/></svg></button>
+      <small id="speedLbl">1×</small>
+      <div class="pop" id="speedPop" hidden></div>
+    </div>
+    <div class="tool">
+      <button class="iconbtn" id="listBtn" aria-label="Cast and transcript"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
+      <small>&nbsp;</small>
+    </div>
+    <div class="tool">
+      <button class="iconbtn" id="sleepBtn" aria-label="Sleep timer"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="7"/><path d="M12 10v3.8l2.4 1.4M9.5 3.5h5"/></svg></button>
+      <small id="sleepLbl">&nbsp;</small>
+      <div class="pop" id="sleepPop" hidden></div>
+    </div>
+  </div>
+
+  <div class="caption" aria-live="polite">
+    <span class="who" id="capWho"></span>
+    <span class="line" id="capLine"></span>
+  </div>
+</main>
+
+<!-- ============ PANELS ============ -->
+<aside class="panel" id="settingsPanel" hidden>
+  <header>Audio Settings <button class="iconbtn" data-close aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+  <section><h4>Theme</h4>
+    <div class="group" data-key="theme"><button data-v="auto">Auto</button><button data-v="light">Light</button><button data-v="dark">Dark</button></div></section>
+  <section><h4>Skip backward interval</h4>
+    <div class="group" data-key="back" data-num><button data-v="5">5 s</button><button data-v="10">10 s</button><button data-v="30">30 s</button></div></section>
+  <section><h4>Skip forward interval</h4>
+    <div class="group" data-key="fwd" data-num><button data-v="5">5 s</button><button data-v="10">10 s</button><button data-v="30">30 s</button></div></section>
+  <section><h4>Autoplay</h4>
+    <label class="switch"><input type="checkbox" id="autoplay" /> Continuous play</label></section>
+</aside>
+
+<aside class="panel" id="castPanel" hidden>
+  <header>Cast &amp; transcript <button class="iconbtn" data-close aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+  <section><div class="engine"><span id="engineLbl"></span><button id="retryEleven" hidden>Try ElevenLabs again</button></div></section>
+  <section id="castList"></section>
+  <section id="transcript" style="padding:8px"></section>
+</aside>
+
+<div class="toast" id="toast" hidden></div>
+
+
+</body>
+</html>
